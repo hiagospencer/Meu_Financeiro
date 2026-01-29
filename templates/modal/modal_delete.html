@@ -1,0 +1,82 @@
+<!-- Modal de Confirmação de Exclusão -->
+<div class="confirm-modal-overlay" id="confirmModalOverlay">
+  <div class="confirm-modal-container">
+    <!-- Ícone de Alerta -->
+    <div class="confirm-modal-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    
+    <!-- Cabeçalho do Modal -->
+    <div class="confirm-modal-header">
+      <h2 class="confirm-modal-title">Confirmar Exclusão</h2>
+    </div>
+    
+    <!-- Corpo do Modal -->
+    <div class="confirm-modal-body">
+      <p class="confirm-modal-message" id="confirmModalMessage">
+        Tem certeza que deseja excluir esta transação?
+      </p>
+      
+      <!-- Detalhes da Transação -->
+      <div class="confirm-modal-details">
+        <div class="confirm-detail-row">
+          <span class="confirm-detail-label">Pessoa:</span>
+          <span class="confirm-detail-value" id="confirmDetailPerson">--</span>
+        </div>
+        <div class="confirm-detail-row">
+          <span class="confirm-detail-label">Valor:</span>
+          <span class="confirm-detail-value" id="confirmDetailAmount">--</span>
+        </div>
+        <div class="confirm-detail-row">
+          <span class="confirm-detail-label">Data:</span>
+          <span class="confirm-detail-value" id="confirmDetailDate">--</span>
+        </div>
+        <div class="confirm-detail-row">
+          <span class="confirm-detail-label">Status:</span>
+          <span class="confirm-detail-value" id="confirmDetailStatus">--</span>
+        </div>
+      </div>
+      
+      <!-- Aviso de Consequência -->
+      <div class="confirm-modal-warning">
+        <i class="fas fa-info-circle"></i>
+        <p>Esta ação não pode ser desfeita. Todos os dados relacionados serão permanentemente removidos.</p>
+      </div>
+      
+      <!-- Campo de Confirmação por Texto -->
+      <div class="confirm-modal-validation">
+        <label for="confirmTextInput" class="confirm-validation-label">
+          Digite <span class="confirm-text-highlight">"EXCLUIR"</span> para confirmar:
+        </label>
+        <input 
+          type="text" 
+          id="confirmTextInput" 
+          class="confirm-text-input"
+          placeholder="Digite EXCLUIR aqui"
+          autocomplete="off"
+        >
+        <div class="confirm-validation-error" id="confirmValidationError"></div>
+      </div>
+    </div>
+    
+    <!-- Rodapé do Modal -->
+    <div class="confirm-modal-footer">
+      <button type="button" class="confirm-modal-btn confirm-modal-btn-cancel" id="confirmModalCancelBtn">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <form action="{% url 'deletar_transacao' %}" method="POST" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="transacao_id" value="{{ transacao.id}}" /> 
+        <button type="submit" class="confirm-modal-btn confirm-modal-btn-delete" id="confirmModalDeleteBtn" disabled>
+          <i class="fas fa-trash"></i> Excluir Permanentemente
+        </button>
+      </form>
+    </div>
+    
+    <!-- Carregamento -->
+    <div class="confirm-modal-loading" id="confirmModalLoading">
+      <div class="loading-spinner"></div>
+      <p>Excluindo transação...</p>
+    </div>
+  </div>
+</div>

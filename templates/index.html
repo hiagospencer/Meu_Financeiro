@@ -1,0 +1,194 @@
+{% load static %}
+{% load moeda_filters %}
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle de Finanças</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'src/css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/modal_edite.css' %}" />
+    <link rel="stylesheet" href="{% static 'src/css/modal_delete.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-money-check-alt"></i> Controle de Finanças</h1>
+        <p class="subtitle">Controle valores a receber</p>
+      </header>
+
+      <div class="dashboard">
+        <div class="card total-card">
+          <h2><i class="fas fa-chart-line"></i> Total a Receber</h2>
+          <div class="total-amount">{{ valor_total|real }}</div>
+          <p>Valor total que as pessoas te devem</p>
+        </div>
+
+        <div class="card">
+          <h2><i class="fas fa-plus-circle"></i> Adicionar/Editar</h2>
+
+          <form id="loanForm" action="" method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="loanId" />
+
+            <div class="form-group">
+              <label for="personName">Nome da Pessoa</label>
+              <input
+                type="text"
+                id="personName"
+                placeholder="Digite o nome de quem deve"
+                name="nome"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="amount">Valor (R$)</label>
+              <input
+                type="number"
+                id="amount"
+                placeholder="0,00"
+                step="0.01"
+                min="0"
+                name="valor"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="description">Descrição</label>
+              <input
+                type="text"
+                id="description"
+                placeholder="Motivo do empréstimo"
+                name="descricao"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="date">Data</label>
+              <input type="date" id="date" required name="data" />
+            </div>
+
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" name="status" required>
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                id="cancelBtn"
+                class="btn btn-danger hidden"
+              >
+                <i class="fas fa-times"></i> Cancelar
+              </button>
+              <button type="submit" id="submitBtn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Salvar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><i class="fas fa-list"></i>Registrados</h2>
+        <form method="GET" class="filters">
+          <input
+            type="text"
+            name="search"
+            placeholder="Pesquisar por pessoa, descrição ou valor"
+            value="{{ search }}"
+          />
+
+          <button type="submit" class="btn-filter">
+            <i class="fas fa-filter"></i> Filtrar
+          </button>
+
+          <a href="{% url 'homepage' %}" class="btn-clear">
+            Limpar
+          </a>
+        </form>
+        <div id="loansTable">
+          <table>
+            {% if transacoes %}
+              <thead>
+                <tr>
+                  <th>Pessoa</th>
+                  <th>Valor (R$)</th>
+                  <th>Descrição</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+
+              {% for transacao in transacoes %}
+                <tbody id="loansTableBody">
+                  <td>{{ transacao.pessoa }}</td>
+                  <td>{{ transacao.valor|real }}</td>
+                  <td>{{ transacao.descricao }}</td>
+                  <td>{{ transacao.data }}</td>
+                  <td>
+                    <span class="status status-{{ transacao.status }}"
+                      >{{ transacao.status }}</span>
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button
+                        class="btn btn-warning btn-sm edit-btn"
+                        onclick="openEditModal('{{ transacao.id }}', '{{ transacao.pessoa }}', '{{ transacao.valor }}', '{{ transacao.descricao }}', '{{ transacao.data }}', '{{ transacao.status }}')"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </button>
+                        {% include 'modal/modal_delete.html' with transacao_id=transacao.id %}
+                        <button
+                          type="submit"
+                          class="btn btn-danger btn-sm delete-btn"
+                          data-id="{{ transacao.id }}"
+                          onclick="openDeleteConfirmModal('{{ transacao.id }}', '{{ transacao.pessoa }}', '{{ transacao.valor }}', '{{ transacao.data }}', '{{ transacao.status }}')"
+                          >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                  </td>
+                </tbody>
+              {% endfor %}
+            {% else %}
+              <div id="noLoansMessage" class="no-data">
+                <i
+                  class="fas fa-inbox"
+                  style="font-size: 3rem; margin-bottom: 10px"
+                ></i>
+                <p>
+                  Nenhum dados cadastrado ainda. Adicione o primeiro usando o
+                  formulário acima.
+                </p>
+              </div>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+
+      <footer>
+        <p>Sistema de Controle de Finanças Pessoais &copy; <span id="currentYear"></span></p>
+        <p>Desenvolvido por <b>Hiago Souza</b></p>
+      </footer>
+    </div>
+
+    {% include 'modal/modal_edite.html' %}
+    
+    
+    <script src="{% static 'src/js/script.js' %}"></script>
+    <script src="{% static 'src/js/modal.js' %}"></script>
+    <script src="{% static 'src/js/modal_delete.js' %}"></script>
+  </body>
+</html>

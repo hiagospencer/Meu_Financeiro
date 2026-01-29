@@ -1,0 +1,107 @@
+<!-- Modal de Edição de Transação -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-container">
+    <!-- Cabeçalho do Modal -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-edit"></i> Editar Transação
+      </h2>
+      <button class="modal-close-btn" id="modalCloseBtn">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Corpo do Modal -->
+    <div class="modal-body">
+      <form id="editTransactionForm" action="{% url 'editar_transacao' %}" method="POST">
+        {% csrf_token %}
+        <!-- Campo Oculto para ID -->
+        <input type="hidden" name="transacao_id" id="modalTransactionId">
+        
+        <div class="modal-form-group">
+          <label for="modalPersonName" class="modal-label">
+            <i class="fas fa-user"></i> Nome da Pessoa
+          </label>
+          <input 
+            type="text" 
+            id="modalPersonName" 
+            class="modal-input"
+            placeholder="Digite o nome de quem deve"
+            name='nome'
+          >
+          <div class="modal-error" id="nameError"></div>
+        </div>
+
+        <div class="modal-form-group">
+          <label for="modalAmount" class="modal-label">
+            <i class="fas fa-money-bill-wave"></i> Valor (R$)
+          </label>
+          <div class="amount-input-container">
+            <span class="currency-prefix">R$</span>
+            <input 
+              type="number" 
+              id="modalAmount" 
+              class="modal-input amount-input"
+              placeholder="0,00"
+              name='valor'
+
+            >
+          </div>
+          <div class="modal-error" id="amountError"></div>
+        </div>
+
+        <div class="modal-form-group">
+          <label for="modalDescription" class="modal-label">
+            <i class="fas fa-file-alt"></i> Descrição
+          </label>
+          <textarea 
+            id="modalDescription" 
+            class="modal-textarea"
+            placeholder="Descreva o motivo do empréstimo..."
+            name='descricao'
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="modal-row">
+          <div class="modal-form-group modal-half">
+            <label for="modalDate" class="modal-label">
+              <i class="fas fa-calendar-alt"></i> Data
+            </label>
+            <input 
+              type="date" 
+              id="modalDate" 
+              class="modal-input"
+              name='data'
+
+            >
+          </div>
+
+          <div class="modal-form-group modal-half">
+            <label for="modalStatus" class="modal-label">
+              <i class="fas fa-tag"></i> Status
+            </label>
+            <div class="status-select-container">
+              <select id="modalStatus" class="modal-select" name='status'>
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </select>
+              <div class="status-indicator" id="statusIndicator"></div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Rodapé do Modal -->
+    <div class="modal-footer">
+      <button type="button" class="modal-btn modal-btn-secondary" id="modalCancelBtn">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button type="submit" form="editTransactionForm" class="modal-btn modal-btn-primary" id="modalSaveBtn">
+        <i class="fas fa-save"></i> Salvar Alterações
+      </button>
+    </div>
+  </div>
+</div>
