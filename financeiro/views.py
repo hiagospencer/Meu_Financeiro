@@ -1,8 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Transacao
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from .models import Transacao, UsuarioPerfil
 from django.db.models import Q
 from .utils import valor_total_transacoes
+from django.contrib.auth.models import User
 
+
+@login_required(login_url='login_financias')
 def homepage(request):
     search = request.GET.get("search", "")
     usuario = request.user
@@ -20,6 +25,7 @@ def homepage(request):
     return render(request, "index.html", context)
 
 
+@login_required(login_url='login_financias')
 def adicionar_trancacao(request):
     if request.method == "POST":
         usuario = request.user
@@ -49,7 +55,7 @@ def adicionar_trancacao(request):
         return redirect("homepage")
     return render(request, "index.html")
 
-
+@login_required(login_url='login_financias')
 def editar_transacao(request):
     if request.method == "POST":
         transacao_id = request.POST.get("transacao_id")
@@ -69,6 +75,7 @@ def editar_transacao(request):
         return redirect("homepage")
     return render(request, "index.html")
 
+@login_required(login_url='login_financias')
 def deletar_transacao(request):
     if request.method == "POST":
         transacao_id = request.POST.get("transacao_id")
@@ -78,3 +85,64 @@ def deletar_transacao(request):
         return redirect("homepage")
     return render(request, "index.html")
         
+def cadastro_financias(request):
+    return render(request, 'cadastro_financias.html')
+
+
+def cadastrar_usuario(request):
+    error = None
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        confirmPassword = request.POST.get("confirmPassword")
+        
+        if not username or not email or not password or not confirmPassword:
+            error = 'Todos os campos são obrigatórios.'
+            return render(request, 'cadastro_financias.html', {'error': error})
+        
+        if User.objects.filter(email=email).exists():
+            error = "Email já cadastrado."
+            return render(request, 'cadastro_financias.html', {'error': error})
+    
+        if password != confirmPassword:
+            error = 'As senhas não concidem.'
+            return render(request, 'cadastro_financias.html', {'error':error})
+        
+        user = User.objects.create(username=username, email=email, password=password)
+        user.save()
+        
+        usuario = UsuarioPerfil.objects.create(usuario=user, senha=password)
+        usuario.save()
+        return redirect('login_financias')
+    return render(request, 'cadastro_financias.html') 
+
+
+def login_financias(request):
+    error = None
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        
+        print(username, password)
+        
+        if not username or not password:
+            error = "Usuário e senha são obrigatórios."
+            return render(request, 'login_financias.html', {"error": error})
+        
+        user = User.objects.filter(username=username, password=password).first()
+        if user:
+            try:
+                authenticate(request, username=username, password=password)
+                login(request, user)
+                return redirect("homepage")
+            except Exception as e:
+                return render(request, 'login_financias.html', {"error": "Erro ao fazer Login. Tente novamente."})
+        error = "Usuário ou senha inválidos."
+        return render(request, 'login_financias.html', {"error": error})
+    else:
+        return render(request, 'login_financias.html')
+    
+def fazer_logout(request):
+    logout(request)
+    return redirect('login_financias')
